@@ -9,7 +9,6 @@ import PSTs
 board = chess.Board()
 searchDepth = 4
 transpositionTable = {}
-nodesCount, quiesceCount, nodesInTT, newNodes, depth0Nodes, reducedNodes, nonReducedNodes = 0, 0, 0, 0, 0, 0, 0
 whitePSTs, blackPSTs, pieceValues = PSTs.whitePSTs, PSTs.blackPSTs, PSTs.pieceValues
 
 piece_to_index = {
@@ -78,21 +77,14 @@ def mvv_lva(move):
 
 def quiescence(depth, legalMoves, alpha, beta) -> int:
 
-    global quiesceCount, nodesInTT, newNodes, depth0Nodes, reducedNodes, nonReducedNodes
-    quiesceCount += 1
-
     zobrist_key = chess.polyglot.zobrist_hash(board)
     if zobrist_key in transpositionTable:
-        #nodesInTT += 1
         return transpositionTable[zobrist_key]
 
     standPat = evaluate(board)
     
     if depth == 0:
-        #depth0Nodes += 1
         return standPat
-
-    #newNodes += 1
 
     if standPat >= beta:
         return beta
@@ -119,20 +111,13 @@ def quiescence(depth, legalMoves, alpha, beta) -> int:
 
 def minimax(depth, legalMoves, alpha, beta, isMaximizingPlayer, isHighestDepth) -> tuple[int, any]:
 
-    global nodesCount, nodesInTT, newNodes, depth0Nodes, reducedNodes, nonReducedNodes
-    nodesCount += 1
-
     zobrist_key = chess.polyglot.zobrist_hash(board)
     if not isHighestDepth and zobrist_key in transpositionTable:
-        nodesInTT += 1
         return transpositionTable[zobrist_key], None
         
     if depth == 0 or board.is_game_over():
-        depth0Nodes += 1
         return evaluate(board), None 
         #return quiescence(2, legalMoves, alpha, beta), None
-
-    newNodes += 1
 
     legalMoves = sorted(legalMoves, key=lambda move: (board.is_capture(move), board.gives_check(move), mvv_lva(move)), reverse=True)
     
@@ -142,10 +127,8 @@ def minimax(depth, legalMoves, alpha, beta, isMaximizingPlayer, isHighestDepth) 
             board.push(child)
 
             if i > 3 and depth > 2 and not board.is_capture(child) and not board.gives_check(child) and not board.is_check():
-                reducedNodes += 1
                 childEval, _ = minimax(depth - 2, list(board.legal_moves), alpha, beta, False, False)
             else:
-                nonReducedNodes += 1
                 childEval, _ = minimax(depth - 1, list(board.legal_moves), alpha, beta, False, False)
 
             
@@ -199,15 +182,6 @@ def prelimSearch(legalMoves, alpha, beta) -> dict:
 
 def main():
 
-    global nodesCount, quiesceCount, nodesInTT, newNodes, depth0Nodes, reducedNodes, nonReducedNodes
-    nodesCount *= 0
-    quiesceCount *= 0
-    nodesInTT *= 0
-    newNodes *= 0
-    depth0Nodes *= 0
-    reducedNodes *= 0
-    nonReducedNodes *= 0
-
     #User's move
     move = input()
     try: 
@@ -237,14 +211,6 @@ def main():
         print('"' + str(responseUCI) + '"')
         print(board)
         #gui.draw(str(board))
-        print("Nodes: " + str(nodesCount))
-        print("Quiesce nodes: " + str(quiesceCount))
-        print("Nodes in TT: " + str(nodesInTT))
-        print("New nodes: " + str(newNodes))
-        print("Depth 0 nodes: " + str(depth0Nodes))
-        print("Reduced nodes: " + str(reducedNodes))
-        print("Non-reduced nodes: " + str(nonReducedNodes))
-
 
     if not board.is_game_over():
         main()
