@@ -4,7 +4,7 @@ import random
 import time
 import cProfile
 
-import PSTs, gui
+import PSTs
 
 board = chess.Board()
 searchDepth = 4
