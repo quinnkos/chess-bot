@@ -22,43 +22,7 @@ piece_to_index = {
 }
 
 openingBook = chess.polyglot.open_reader("codekiddy.bin")
-
-'''
-zobrist_table = [[[random.getrandbits(64) for _ in range(12)] for _ in range(64)] for _ in range(2)]
-def zobrist_hash(board):
-    hash_value = 0
-    for square in chess.SQUARES:
-        piece = board.piece_at(square)
-        if piece is not None:
-            piece_color = 0 if piece.color == chess.WHITE else 1
-            piece_type_index = piece_to_index[piece.piece_type]
-            hash_value ^= zobrist_table[piece_color][square][piece_type_index]
-    return hash_value
-'''
-
-'''zobrist_table = [[[0 for _ in range(6)] for _ in range(64)] for _ in range(2)]
-
-def zobrist_hash(board):
-    hash_value = 0
-    fen = board.fen().split()[0]
-    rows = fen.split('/')
-
-    for rank in range(8):
-        file = 0
-        for char in rows[rank]:
-            if char.isdigit():
-                file += int(char)
-            else:
-                piece = chess.Piece.from_symbol(char)
-                piece_color = 0 if piece.color == chess.WHITE else 1
-                piece_type_index = piece_to_index[piece.piece_type]
-                square = chess.square(file, 7 - rank)
-                hash_value ^= zobrist_table[piece_color][square][piece_type_index]
-                file += 1
-
-    return hash_value'''
     
-
 def evaluate(board) -> int:
     
     if board.result() == "1-0":
